@@ -83,7 +83,7 @@ function compareLightness(a,b) {
 }
 	
 function distFrom0(a){
-	return (Math.sqrt(a[0]^2 + a[1]^2 + a[2]^2));
+	return Math.sqrt( (Math.pow(a[0],2) + Math.pow(a[1],2) + Math.pow(a[2],2) ) );
 	}
 
 function compare3dRgb(a,b) {
@@ -349,7 +349,7 @@ function updateTable(palette){
 	colorList['brown'] = sortColors(colors, compareBrown);
 
 	colorList['total'] = sortColors(colors, compareTotal);
-//	colorList['rgb'] = sortColors(colors, compare3dRgb);
+	colorList['rgb'] = sortColors(colors, compare3dRgb);
 
 	colorList['x'] = sortColors(colors, compareX);
 	colorList['y'] = sortColors(colors, compareY);
