@@ -82,23 +82,23 @@ function compare3dHsv(a,b) {
 	return(distFrom0(a[3],a[4],a[5]) - distFrom0(b[3],b[4],b[5]));
 }
 
+function compare3dHsl(a,b){
+    return(distFrom0(a[3],a[4],a[15]) - distFrom0(b[3], b[4], b[15]));
+}
+
 function compare3dRgb(a,b) {
 	// distance from 0,0,0 in rgb space
 	return (distFrom0(a[0],a[1],a[2]) - distFrom0(b[0],b[1],b[2]));
 }
 
 function compareWhiteness(a,b) {
-	hwb_a = rgb_to_hwb(a);
-	hwb_b = rgb_to_hwb(b);
 	
-	return (hwb_a[1] - hwb_b[1]);
+	return (a[7] - b[7]);
 }
 
 function compareBlackness(a,b) {
-	hwb_a = rgb_to_hwb(a);
-	hwb_b = rgb_to_hwb(b);
 	
-	return (hwb_a[2] - hwb_b[2]);
+	return (a[6] - b[6]);
 }
 
 function compareCyan(a,b) {
@@ -312,7 +312,7 @@ function preComputeColors(colors) {
 		hwb = rgb_to_hwb(colors[i]);
 		cmyk = rgb_to_cmyk(colors[i]);
 		hsl = rgb_to_hsl(colors[i]);
-		                   // red, green, blue, hue, sat, value, whiteness, blackness, X, Y, Z
+		                   // red, green, blue, hue, sat, value, whiteness, blackness, X, Y, Z,cyan, magent, yellow, black,lightness
 		colorspaces[i] = [colors[i][0], colors[i][1], colors[i][2],
 						      hsv[0], hsv[1], hsv[2],
 						      hwb[1], hwb[2],
@@ -345,20 +345,21 @@ function updateTable(palette){
 	colorList['brown'] = sortColors(colors, compareBrown);
 
 	colorList['total'] = sortColors(colors, compareTotal);
-	colorList['rgb3d'] = sortColors(colors, compare3dRgb);
+	colorList['rgb3d'] = sortColors(colors, compare3dRgb).reverse();
 	colorList['hsv3d'] = sortColors(colors, compare3dHsv);
+    colorList['hsl3d'] = sortColors(colors, compare3dHsl);
 
-	colorList['x'] = sortColors(colors, compareX);
-	colorList['y'] = sortColors(colors, compareY);
-	colorList['z'] = sortColors(colors, compareZ);
+	colorList['x'] = sortColors(colors, compareX).reverse();
+	colorList['y'] = sortColors(colors, compareY).reverse();
+	colorList['z'] = sortColors(colors, compareZ).reverse();
 	
 	colorList['hue'] = sortColors(colors, compareHue);	
 	colorList['sat'] = sortColors(colors, compareSat);
-	colorList['value'] = sortColors(colors, compareValue);
+	colorList['value'] = sortColors(colors, compareValue).reverse();
 	colorList['lightness'] = sortColors(colors, compareLightness);
 	
-	colorList['whiteness'] = sortColors(colors, compareWhiteness);
-	colorList['blackness'] = sortColors(colors, compareBlackness);
+	colorList['whiteness'] = sortColors(colors, compareWhiteness).reverse();
+	colorList['blackness'] = sortColors(colors, compareBlackness).reverse();
 	
 	colorList['cyan'] = sortColors(colors, compareCyan);
 	colorList['magenta'] = sortColors(colors, compareMagenta);
