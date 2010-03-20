@@ -303,10 +303,44 @@ function Sorter(name, compare) {
 	this.colors = [];
 }
 
+function Color(red,green,blue) {
+    this.red = red;
+    this.green = green;
+    this.blue = blue;
+    rgb = [red,green,blue];
+    hsv = rgb_to_hsv(rgb);
+    hsl = rgb_to_hsl(rgb);
+    hwb = rgb_to_hsl(rgb);
+    xyz = rgb_to_hsl(rgb);
+    cmyk = rgb_to_hsl(rgb);
+    this.hue = hsv[0];
+    this.sat = hsv[1];
+    this.value = hsv[2];
+    this.whiteness = hwb[1];
+    this.blackness = hwb[2];
+    this.x = xyz[0];
+    this.y = xyz[1];
+    this.z = xyz[2];
+    this.cyan = cmyk[0];
+    this.magenta = cmyk[1];
+    this.yellow = cmyk[2];
+
+}
+
+Color.prototype = {
+    get3dRgb: function() {
+        return this.red;
+    },
+    get3dHsv: function() {
+        return this.blue;
+    }
+};
+
 
 function preComputeColors(colors) {
 	var colorspaces = [];
 	for (i in colors) {
+        var tmpcolor = new Color(colors[i]);
 		hsv = rgb_to_hsv(colors[i]);
 		xyz = rgb_to_xyz(colors[i]);
 		hwb = rgb_to_hwb(colors[i]);
@@ -378,8 +412,9 @@ function updateTable(palette){
 	for (j in colorList) {
 		writeTableRow(j, table, colorList[j]);
 		}
+    $('palette_table').replaceWith(table);
 
-
+           
   
   } 
       
