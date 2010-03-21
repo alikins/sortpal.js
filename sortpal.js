@@ -1,75 +1,62 @@
 
-function decimalToHex(d, padding) {
-    var hex = Number(d).toString(16);
-    padding = typeof (padding) === "undefined" || padding === null ? padding = 2 : padding;
 
-    while (hex.length < padding) {
-        hex = "0" + hex;
-    }
-
-    return hex;
-}
-
-function arrayToHex(a){
-	var color = "";
-	color = "#" + decimalToHex(a[0],2) + decimalToHex(a[1],2) + decimalToHex(a[2],2);
-	return color;
-}
 
 function compareRed(a,b){
-	return (a[0] - b[0]);
+	return (a.red - b.red);
 }
 
 function compareBlue(a,b) {
-	return (a[2] - b[2]);
+	return (a.blue - b.blue);
 }
 
 function compareGreen(a,b) {
-	return (a[1] - b[1]);
+	return (a.green - b.green);
 }
 
+
+
 function comparePurple(a,b) {
-	return ((a[0]*a[2]) - (b[0]*b[2]));
+	return ((a.red * a.blue) - (b.red * b.blue));
 }
 
 function compareBlueGreen(a,b) {
-	return ((a[1]*a[2]) - (b[1]*b[2]));
+	return ((a.blue * a.green) - (b.blue * b.green));
 }
 
 function compareBrown(a,b) {
-	return ((a[0]*a[1]) - (b[0]*b[1]));
+	return ((a.red * b.green) - (b.red * b.green));
 }
 
 function compareTotal(a,b) {
-	return ( (a[0]+a[1]+a[2]) - (b[0]+b[1]*b[2]));
+	return ( (a.red+a.green+a.blue) - (b.red+b.green+b.blue));
 }
 
 function compareX(a,b) {
-	return (a[8] - b[8]);
+	return (a.x - b.x);
 	}
 	
 function compareY(a,b) {
-	return (a[9] - b[9]); 
+	return (a.y - b.y);
 }	
 
 function compareZ(a,b) {
-	return (a[10] - b[10]); 
+	return (a.z - b.z);
 }	
 
 function compareHue(a,b) {
-	return (a[3] - b[3]);
+	return (a.hue - b.hue);
 }
 
 function compareSat(a,b) {
-	return (a[4] - b[4]);
+	return (a.sat - b.sat);
 }
 
 function compareValue(a,b) {
-	return (a[5] - b[5]);
+	return (a.value - b.value);
 }
 
 function compareLightness(a,b) {
-	return (a[15] - b[15]);
+	return (a.lightness - b.lightness);
 }
 	
 function distFrom0(x,y,z){
@@ -79,43 +66,40 @@ function distFrom0(x,y,z){
 // HSV space is sorta/kindof a cylinder, so this should sort of work
 // not sure what the best reference point here is. 
 function compare3dHsv(a,b) {
-	return(distFrom0(a[3],a[4],a[5]) - distFrom0(b[3],b[4],b[5]));
+	return(distFrom0(a.hue, a.sat, a.value) - distFrom0(b.hue, b.sat, b.value));
 }
 
 function compare3dHsl(a,b){
-    return(distFrom0(a[3],a[4],a[15]) - distFrom0(b[3], b[4], b[15]));
+    return(distFrom0(a.hue, a.sat,a.lightness) - distFrom0(b.hue, b.sat, b.lightness));
 }
 
 function compare3dRgb(a,b) {
 	// distance from 0,0,0 in rgb space
-	return (distFrom0(a[0],a[1],a[2]) - distFrom0(b[0],b[1],b[2]));
+	return (distFrom0(a.red, a.green, a.blue) - distFrom0(b.red, b.green, b.blue));
 }
 
 function compareWhiteness(a,b) {
 	
-	return (a[7] - b[7]);
+	return (a.whiteness - b.whiteness);
 }
 
 function compareBlackness(a,b) {
 	
-	return (a[6] - b[6]);
+	return (a.blackness - b.blackness);
 }
 
 function compareCyan(a,b) {
-	return (a[11] - b[11]);
+	return (a.cyan - b.cyan);
 }
 
 function compareMagenta(a,b) {
-	return (a[12] - b[12]);
+	return (a.magenta - b.magenta);
 }
 
 function compareYellow(a,b) {
-	return (a[13] - b[13]); 
+	return (a.yellow - b.yellow);
 }
 
-function compareBlack(a,b) {
-	return (a[14] - b[14]);
-}
 
 function rgb_to_hwb(rgb) {
 	var min = Math.min(rgb[0], rgb[1], rgb[2]);
@@ -303,11 +287,11 @@ function Sorter(name, compare) {
 	this.colors = [];
 }
 
-function Color(red,green,blue) {
-    this.red = red;
-    this.green = green;
-    this.blue = blue;
-    rgb = [red,green,blue];
+function Color(rgb) {
+    this.red = rgb[0];
+    this.green = rgb[1];
+    this.blue = rgb[2];
+    
     hsv = rgb_to_hsv(rgb);
     hsl = rgb_to_hsl(rgb);
     hwb = rgb_to_hsl(rgb);
@@ -328,31 +312,29 @@ function Color(red,green,blue) {
 }
 
 Color.prototype = {
-    get3dRgb: function() {
-        return this.red;
+    decimalToHex: function(d, padding) {
+        var hex = Number(d).toString(16);
+        padding = typeof (padding) === "undefined" || padding === null ? padding = 2 : padding;
+
+        while (hex.length < padding) {
+            hex = "0" + hex;
+        }
+        return hex;
     },
-    get3dHsv: function() {
-        return this.blue;
+    hexrgb: function() {
+      var colorstring =   "#" + this.decimalToHex(this.red,2) + this.decimalToHex(this.green,2) + this.decimalToHex(this.blue,2);
+      return colorstring;
     }
 };
+
 
 
 function preComputeColors(colors) {
 	var colorspaces = [];
 	for (i in colors) {
-        var tmpcolor = new Color(colors[i]);
-		hsv = rgb_to_hsv(colors[i]);
-		xyz = rgb_to_xyz(colors[i]);
-		hwb = rgb_to_hwb(colors[i]);
-		cmyk = rgb_to_cmyk(colors[i]);
-		hsl = rgb_to_hsl(colors[i]);
-		                   // red, green, blue, hue, sat, value, whiteness, blackness, X, Y, Z,cyan, magent, yellow, black,lightness
-		colorspaces[i] = [colors[i][0], colors[i][1], colors[i][2],
-						      hsv[0], hsv[1], hsv[2],
-						      hwb[1], hwb[2],
-						      xyz[0], xyz[1], xyz[2],
-						      cmyk[0], cmyk[1], cmyk[2], cmyk[3],
-						      hsl[2]];				
+        var color_item = new Color(colors[i]);
+        colorspaces[i] = color_item;
+
 		}
 		
 	return colorspaces;
@@ -398,7 +380,7 @@ function updateTable(palette){
 	colorList['cyan'] = sortColors(colors, compareCyan);
 	colorList['magenta'] = sortColors(colors, compareMagenta);
 	colorList['yellow'] = sortColors(colors, compareYellow);
-	colorList['black'] = sortColors(colors, compareBlack);
+//	colorList['black'] = sortColors(colors, compareBlack);
 	
 //	table = "<TABLE id=palette_table width=100% BORDER=0 CELLSPACING=0 CELLPADDING=0>";
 //	table = table + "<thead><tr><th>Red</th><th>Green</th><th>Blue</th><th>rgb</th><th>X</th><th>Y</th><th>Z</th><th>Hue</th><th>Sat</th><th>Value</th><th>whiteness</th><th>blackness</th></tr></thead>";
@@ -424,7 +406,7 @@ function writeTableRow(name, table, colors) {
 	label.innerHTML = name;
 	for (i in colors ) {
 		var cell = row.insertCell(0);
-		cell.bgColor =arrayToHex(colors[i]);
+		cell.bgColor = colors[i].hexrgb();
 		cell.innerHTML = "&nbsp;"	
 //		document.getElementById('palette_table');			
 	}
