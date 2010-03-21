@@ -281,17 +281,12 @@ function genColors() {
 	return colors;
 }
 
-function Sorter(name, compare) {
-	this.name = name;
-	this.cmp = compare;
-	this.colors = [];
-}
 
 function Color(rgb) {
     this.red = rgb[0];
     this.green = rgb[1];
     this.blue = rgb[2];
-    
+
     hsv = rgb_to_hsv(rgb);
     hsl = rgb_to_hsl(rgb);
     hwb = rgb_to_hsl(rgb);
@@ -322,18 +317,41 @@ Color.prototype = {
         return hex;
     },
     hexrgb: function() {
-      var colorstring =   "#" + this.decimalToHex(this.red,2) + this.decimalToHex(this.green,2) + this.decimalToHex(this.blue,2);
-      return colorstring;
+      return "#" + this.decimalToHex(this.red,2) + this.decimalToHex(this.green,2) + this.decimalToHex(this.blue,2);
     }
 };
 
 
+function Sorter() {
+    this.red = function(a,b) {
+        return (a.red - b.red);
+    }
+
+    this.green = function(a,b) {
+        return (a.green - b.green);
+   }
+
+    this.blue = function(a,b) {
+        return (a.blue - b.blue);
+    }
+} 
+
+function ColorList(colors) {
+    this.list = colors;
+}
+
+ColorList.prototype = {
+    sorter: new Sorter(),
+
+    sorted: function(mode) {
+            return this.list.sort(this.sorter[mode]);
+    }
+}
 
 function preComputeColors(colors) {
 	var colorspaces = [];
 	for (i in colors) {
-        var color_item = new Color(colors[i]);
-        colorspaces[i] = color_item;
+        colorspaces[i] = new Color(colors[i]);
 
 		}
 		
@@ -345,12 +363,45 @@ function sortColors(colors, cmp) {
 	sortedColors.sort(cmp);
 	return sortedColors;
 }
-					 
+
+function drawColorList(colorlist){
+    var y_offset = 0;
+    var y_spacing = 25;
+    for (l in colorlist) {
+        drawPalette(colorlist[l], y_offset);
+        y_offset = y_offset + y_spacing;
+    }
+}
+
+function drawPalette(palette, y_offset) {
+    var canvas = document.getElementById("canvas");
+    var ctx = canvas.getContext("2d");
+
+
+    var height = 25;
+    var width = 8;
+
+    ctx.lineWidth = 8;
+    var count = 0;
+    for (i in palette){
+        ctx.strokeStyle = palette[i].hexrgb();
+ //       ctx.strokeStyle = rgb(255,0,0);
+        ctx.beginPath();
+        ctx.moveTo((count*width),y_offset)
+        ctx.lineTo((count*width), y_offset+height);
+        ctx.stroke();
+        count++;
+    }
+}
+
 function updateTable(palette){
 	var colorList = [];
 	var rgbColors = getColors(palette);
 
-	colors = preComputeColors(rgbColors);
+    var cl = new ColorList(rgbColors);
+    var blip = cl.sorted('red');
+
+	var colors = preComputeColors(rgbColors);
 	
 	colorList['red'] = sortColors(colors, compareRed);
 	colorList['green'] = sortColors(colors, compareGreen);
@@ -390,11 +441,15 @@ function updateTable(palette){
 
 	table = document.getElementById('palette_table');
 
-				
-	for (j in colorList) {
-		writeTableRow(j, table, colorList[j]);
-		}
-    $('palette_table').replaceWith(table);
+
+    drawColorList(colorList);
+//	for (j in colorList) {
+//        drawPalette(colorList[j]);
+//    }
+	//for (j in colorList) {
+	//	writeTableRow(j, table, colorList[j]);
+	//	}
+    //$('palette_table').replaceWith(table);
 
            
   
