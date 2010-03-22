@@ -390,10 +390,10 @@ function drawPalette(palette, name) {
     var canvas = document.createElement('canvas');
     canvas.id = l;
 
-    var height = 25;
+    var height = 24;
     var width = 2;
 
-    canvas.height = 20;
+    canvas.height = height;
     canvas.width = (width*palette.length);
 
     var ctx = canvas.getContext("2d");
@@ -402,6 +402,7 @@ function drawPalette(palette, name) {
     var count = 0;
 
 
+    palette.reverse();
     for (i in palette){
         ctx.strokeStyle = palette[i].hexrgb();
  //       ctx.strokeStyle = rgb(255,0,0);
