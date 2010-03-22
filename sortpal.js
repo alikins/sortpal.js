@@ -367,31 +367,53 @@ function sortColors(colors, cmp) {
 function drawColorList(colorlist){
     var y_offset = 0;
     var y_spacing = 25;
+    var t = document.getElementById('palette_table');
     for (l in colorlist) {
-        drawPalette(colorlist[l], y_offset);
+
+        row = t.insertRow(0);
+        var label = row.insertCell(0);
+        label.innerHTML = l;
+        var canvasCell = row.insertCell(0);
+        canvasCell.appendChild(drawPalette(colorlist[l], y_offset, i));
+
         y_offset = y_offset + y_spacing;
+
+       var label2 = row.insertCell(0);
+       label2.innerHTML = l;
     }
+
+
 }
 
-function drawPalette(palette, y_offset) {
-    var canvas = document.getElementById("canvas");
-    var ctx = canvas.getContext("2d");
+function drawPalette(palette, name) {
 
+    var canvas = document.createElement('canvas');
+    canvas.id = l;
 
     var height = 25;
-    var width = 8;
+    var width = 2;
 
-    ctx.lineWidth = 8;
+    canvas.height = 20;
+    canvas.width = (width*palette.length);
+
+    var ctx = canvas.getContext("2d");
+
+    ctx.lineWidth = 2;
     var count = 0;
+
+
     for (i in palette){
         ctx.strokeStyle = palette[i].hexrgb();
  //       ctx.strokeStyle = rgb(255,0,0);
         ctx.beginPath();
-        ctx.moveTo((count*width),y_offset)
-        ctx.lineTo((count*width), y_offset+height);
+        ctx.moveTo((count*width),0);
+        ctx.lineTo((count*width),height);
         ctx.stroke();
         count++;
     }
+
+    return canvas;
+ 
 }
 
 function updateTable(palette){
@@ -402,7 +424,7 @@ function updateTable(palette){
     var blip = cl.sorted('red');
 
 	var colors = preComputeColors(rgbColors);
-	
+
 	colorList['red'] = sortColors(colors, compareRed);
 	colorList['green'] = sortColors(colors, compareGreen);
 	colorList['blue'] = sortColors(colors, compareBlue);
@@ -441,6 +463,7 @@ function updateTable(palette){
 
 	table = document.getElementById('palette_table');
 
+ 
 
     drawColorList(colorList);
 //	for (j in colorList) {
