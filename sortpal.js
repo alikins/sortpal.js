@@ -13,8 +13,6 @@ function compareGreen(a,b) {
 	return (a.green - b.green);
 }
 
-
-
 function comparePurple(a,b) {
 	return ((a.red * a.blue) - (b.red * b.blue));
 }
@@ -152,7 +150,8 @@ function rgb_to_hsl(rgb){
     r /= 255;
     g /= 255;
     b /= 255;
-    var max = Math.max(r, g, b), min = Math.min(r, g, b);
+    var max = Math.max(r, g, b);
+    var min = Math.min(r, g, b);
     var h, s, l = (max + min) / 2;
 
     if(max == min){
@@ -250,8 +249,8 @@ function rgb_to_xyz(rgb) {
 	blue = rgb[2];
 	
 	x = ((0.412453 * red) + (0.357580 * green) + (0.180423 * blue));
-    y = ((0.212671 * red) + (0.715160 * green) + (0.072169 * blue));
-    z = ((0.019334 * red) + (0.119193 * green) + (0.950227 * blue));
+	y = ((0.212671 * red) + (0.715160 * green) + (0.072169 * blue));
+	z = ((0.019334 * red) + (0.119193 * green) + (0.950227 * blue));
 	
 	xyz = [x,y,z];
 	return xyz;
@@ -354,9 +353,8 @@ Color.prototype = {
 function preComputeColors(colors) {
 	var colorspaces = [];
 	for (color in colors) {
-        colorspaces[color] = new Color(colors[color]);
-
-		}
+	  colorspaces[color] = new Color(colors[color]);
+	}
 		
 	return colorspaces;
 }
@@ -429,7 +427,7 @@ function updateTable(palette){
 
 	var colors = preComputeColors(rgbColors);
 
-    colors.sort();
+	colors.sort();
 	colorList.red = sortColors(colors, compareRed);
 	colorList.green = sortColors(colors, compareGreen);
 	colorList.blue = sortColors(colors, compareBlue);
@@ -441,7 +439,7 @@ function updateTable(palette){
 	colorList.total = sortColors(colors, compareTotal);
 	colorList.rgb3d = sortColors(colors, compare3dRgb).reverse();
 	colorList.hsv3d = sortColors(colors, compare3dHsv);
-    colorList.hsl3d = sortColors(colors, compare3dHsl);
+	colorList.hsl3d = sortColors(colors, compare3dHsl);
 
 	colorList.x = sortColors(colors, compareX).reverse();
 	colorList.y = sortColors(colors, compareY).reverse();
