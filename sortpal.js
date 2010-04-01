@@ -2,7 +2,7 @@
 
 
 function compareRed(a,b){
-	return (a.red - b.red);
+    return (a.red - b.red);
 }
 
 function compareBlue(a,b) {
@@ -53,6 +53,10 @@ function compareValue(a,b) {
 	return (a.value - b.value);
 }
 
+function compareChroma(a,b) {
+    return (a.chroma - b.chroma);
+}
+
 function compareLightness(a,b) {
 	return (a.lightness - b.lightness);
 }
@@ -86,6 +90,18 @@ function compareBlackness(a,b) {
 	return (a.blackness - b.blackness);
 }
 
+function compareCr(a,b) {
+        return (a.cr -b.cr);
+}
+
+function compareU(a,b) {
+    return (a.u - b.u);
+}
+
+function compareV(a,b){
+    return (a.v - b.v);
+}
+
 function compareCyan(a,b) {
 	return (a.cyan - b.cyan);
 }
@@ -98,6 +114,18 @@ function compareYellow(a,b) {
 	return (a.yellow - b.yellow);
 }
 
+
+//http://www.fourcc.org/fccyvrgb.php 
+function rgb_to_yuv(rgb) {
+ //   Ey = 0.299R + 0.587G + 0.114B
+ //  U = Ecr = 0.713(R - Ey) = 0.500R - 0.419G - 0.081B
+ //  V = Ecb = 0.564(B - Er) = -0.169R - 0.331G + 0.500B (Gregory Smith points out that Er here should read Ey - equations above were corrected)
+    y = (0.299 * rgb[0])  + (0.587 * rgb[1]) + (0.114 * rgb[2]);
+    u = (.5 * rgb[0]) - (0.419 * rgb[1]) - (0.081 * rgb[2]);
+    v = (-0.169 * rgb[0])  - (0.331 * rgb[1]) + (0.5 * rgb[3]);
+
+    return [y,u,v];
+}
 
 function rgb_to_hwb(rgb) {
 	var min = Math.min(rgb[0], rgb[1], rgb[2]);
@@ -171,7 +199,7 @@ function rgb_to_hsl(rgb){
 }
 
 // from http://mjijackson.com/2008/02/rgb-to-hsl-and-rgb-to-hsv-color-model-conversion-algorithms-in-javascript
-function rgb_to_hsv(rgb){
+function rgb_to_hsvc(rgb){
 	 var r = rgb[0];
 	 var g = rgb[1];
 	 var b = rgb[2];
@@ -185,21 +213,21 @@ function rgb_to_hsv(rgb){
     var s = max;
     var v = max;
 
-    var d = max - min;
-    s = max === 0 ? 0 : d / max;
+    var c = max - min;
+    s = max === 0 ? 0 : c / max;
 
     if(max == min){
         h = 0; // achromatic
     }else{
         switch(max){
-            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-            case g: h = (b - r) / d + 2; break;
-            case b: h = (r - g) / d + 4; break;
+            case r: h = (g - b) / c + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / c + 2; break;
+            case b: h = (r - g) / c + 4; break;
         }
         h /= 6;
     }
 
-    return [h, s, v];
+    return [h, s, v, c];
 }
 
 
@@ -289,16 +317,22 @@ function Color(rgb) {
     this.green = rgb[1];
     this.blue = rgb[2];
 
-    hsv = rgb_to_hsv(rgb);
+    hsvc = rgb_to_hsvc(rgb);
     hsl = rgb_to_hsl(rgb);
     hwb = rgb_to_hsl(rgb);
     xyz = rgb_to_hsl(rgb);
-    cmyk = rgb_to_hsl(rgb);
-    this.hue = hsv[0];
-    this.sat = hsv[1];
-    this.value = hsv[2];
+    cmyk = rgb_to_cmyk(rgb);
+    yuv = rgb_to_yuv(rgb);
+    this.hue = hsvc[0];
+    this.sat = hsvc[1];
+    this.value = hsvc[2];
+    this.chroma = hsvc[3];
     this.whiteness = hwb[1];
     this.blackness = hwb[2];
+    this.lightness = hsl[2];
+    this.cr = yuv[0];
+    this.u = yuv[1];
+    this.v = yuv[2];
     this.x = xyz[0];
     this.y = xyz[1];
     this.z = xyz[2];
@@ -448,7 +482,12 @@ function updateTable(palette){
 	colorList.hue = sortColors(colors, compareHue);
 	colorList.sat = sortColors(colors, compareSat);
 	colorList.value = sortColors(colors, compareValue).reverse();
+    colorList.chroma = sortColors(colors, compareChroma);
 	colorList.lightness = sortColors(colors, compareLightness);
+
+    colorList.cr = sortColors(colors, compareCr);
+    colorList.u = sortColors(colors, compareU);
+    colorList.v = sortColors(colors, compareV);
 	
 	colorList.whiteness = sortColors(colors, compareWhiteness).reverse();
 	colorList.blackness = sortColors(colors, compareBlackness).reverse();
