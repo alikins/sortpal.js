@@ -228,7 +228,6 @@ function Color(rgb) {
     this.sat = hsvc[1];
     this.value = hsvc[2];
 
-
     this.hsv3d = distFrom0(this.hue, this.sat, this.value);
 
     this.chroma = hsvc[3];
@@ -271,11 +270,16 @@ Color.prototype = {
 
 function Sorter(sort) {
     var sortvalue = sort;
-    var secsortvalue = 'sat';
+    var secsortvalue = 'hsv3d';
+    var tertsortvalue = 'chroma';
     this.cmp = function(a,b) {
         var pri = (a[sortvalue] - b[sortvalue]);
         if (pri === 0) {
-            return (a[secsortvalue] - b[secsortvalue]);
+            var sec = (a[secsortvalue] - b[secsortvalue]);
+            if (sec === 0) {
+                return (a[tertsortvalue] - b[tertsortvalue]);
+            }
+            return sec;
         }
         return pri;
     }
@@ -347,18 +351,6 @@ function ColorSorter(colors) {
         return colorList;
     }
 
-    this.comparePurple = function(a,b) {
-        return ((a.red * a.blue) - (b.red * b.blue));
-    }
-
- //   function compareBlueGreen(a,b) {
- //       return ((a.blue * a.green) - (b.blue * b.green));
- //   }
-
- //   function compareBrown(a,b) {
- //       return ((a.red * b.green) - (b.red * b.green));
- //   }
-
 
 }
 
@@ -404,9 +396,7 @@ function drawPalette(palette, name) {
     // should probably fix the cmp's instead
     palette.reverse();
     for (i in palette){
- //       console.log(palette[i]);
         ctx.strokeStyle = palette[i].hexrgb();
- //       ctx.strokeStyle = rgb(255,0,0);
         ctx.beginPath();
         ctx.moveTo((count*width),0);
         ctx.lineTo((count*width),height);
@@ -419,25 +409,16 @@ function drawPalette(palette, name) {
 }
 
 function updateTable(palette){
-	var colorList = [];
 	var rgbColors = getColors(palette);
 
 	var colors = preComputeColors(rgbColors);
 
-
-    var blip = new ColorSorter(colors);
-    var foo = blip.getColors();
-
-//	colorList.total = sortColors(colors, compareTotal);
-//	colorList.rgb3d = sortColors(colors, compare3dRgb).reverse();
-//	colorList.hsv3d = sortColors(colors, compare3dHsv);
-//	colorList.hsl3d = sortColors(colors, compare3dHsl);
+    var color_sorter = new ColorSorter(colors);
+    var color_list = color_sorter.getColors();
 
 	table = document.getElementById('palette_table');
 
-
-   // drawColorList(colorList);
-   drawColorList(foo);
+    drawColorList(color_list);
 
   } 
       
