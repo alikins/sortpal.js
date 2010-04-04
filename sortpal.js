@@ -12,16 +12,38 @@ function rgb_to_yuv(rgb) {
  //   Ey = 0.299R + 0.587G + 0.114B
  //  U = Ecr = 0.713(R - Ey) = 0.500R - 0.419G - 0.081B
  //  V = Ecb = 0.564(B - Er) = -0.169R - 0.331G + 0.500B (Gregory Smith points out that Er here should read Ey - equations above were corrected)
-    y = (0.299 * rgb[0])  + (0.587 * rgb[1]) + (0.114 * rgb[2]);
-    u = (.5 * rgb[0]) - (0.419 * rgb[1]) - (0.081 * rgb[2]);
-    v = (-0.169 * rgb[0])  - (0.331 * rgb[1]) + (0.5 * rgb[2]);
+    var r = rgb[0]/255;
+    var g = rgb[1]/255;
+    var b = rgb[2]/255;
+    y = (0.299 * r)  + (0.587 * g) + (0.114 * b);
+    u = (.5 * r) - (0.419 * g) - (0.081 * b);
+    v = (-0.169 * r)  - (0.331 * g) + (0.5 * b);
 
-    return [y,u,v];
+    // This method is wrong
+    
+    return [y+1 ,u,v+1];
 }
+
+
+function rgb_to_xyz(rgb) {
+	red = rgb[0];
+	green = rgb[1];
+	blue = rgb[2];
+
+	x = ((0.412453 * red) + (0.357580 * green) + (0.180423 * blue));
+	y = ((0.212671 * red) + (0.715160 * green) + (0.072169 * blue));
+	z = ((0.019334 * red) + (0.119193 * green) + (0.950227 * blue));
+
+	xyz = [x,y,z];
+	return xyz;
+}
+
 
 function rgb_to_hwb(rgb) {
 	var min = Math.min(rgb[0], rgb[1], rgb[2]);
 	var max = Math.max(rgb[0], rgb[1], rgb[2]);
+    var v = max;
+    var w = min;
 	b = 255 -v;
 
 	// dont really need hue here, just stub it and return w/b
@@ -124,59 +146,6 @@ function rgb_to_hsvc(rgb){
 
 
 
-function rgb_to_hsv_akl(rgb) {
-	
-	var min = Math.min(rgb[0], rgb[1], rgb[2]);
-	var max = Math.max(rgb[0], rgb[1], rgb[2]);
-	var delta = max - min;
-
-	var hsv = [0,0,0];
-	hsv[0] = max;
-	
-	if (delta === 0) {
-		hsv[1] = 0;
-		hsv[2] = 0;
-		} else {
-		
-		// value
-		hsv[1] = delta/max;
-		
-		var del_R = (((max - rgb[0]) / 6) + (delta / 2)) / delta;
-		var del_G = (((max - rgb[1]) / 6) + (delta / 2)) / delta;
-		var del_B = (((max - rgb[2]) / 6) + (delta / 2)) / delta;
-
-		if (rgb[0] == max){
-			hsv[0] = del_B - del_G;
-		} else if (rgb[1] == max) {
-			hsv[0] = (1 / 3) + del_R - del_B;
-		} else if (rgb[2] == max) {
-			hsv[0] = (2 / 3) + del_G - del_R;
-		}
-				
-		if (hsv[0] < 0) {hsv[0] += 1;}
-		if (hsv[0] > 1) {hsv[0] -= 1;}
-	}
-	hsv[0] *= 360;
-	hsv[1] *= 100;
-	hsv[2] *= 100;
-
-    return hsv;
-}
-
-function rgb_to_xyz(rgb) {
-	red = rgb[0];
-	green = rgb[1];
-	blue = rgb[2];
-	
-	x = ((0.412453 * red) + (0.357580 * green) + (0.180423 * blue));
-	y = ((0.212671 * red) + (0.715160 * green) + (0.072169 * blue));
-	z = ((0.019334 * red) + (0.119193 * green) + (0.950227 * blue));
-	
-	xyz = [x,y,z];
-	return xyz;
-}	
-
-
 function genColorsRandom() {
 	var colors = [];
 
@@ -220,8 +189,8 @@ function Color(rgb) {
 
     hsvc = rgb_to_hsvc(rgb);
     hsl = rgb_to_hsl(rgb);
-    hwb = rgb_to_hsl(rgb);
-    xyz = rgb_to_hsl(rgb);
+    hwb = rgb_to_hwb(rgb);
+    xyz = rgb_to_xyz(rgb);
     cmyk = rgb_to_cmyk(rgb);
     yuv = rgb_to_yuv(rgb);
     this.hue = hsvc[0];
@@ -249,6 +218,8 @@ function Color(rgb) {
     this.cyan = cmyk[0];
     this.magenta = cmyk[1];
     this.yellow = cmyk[2];
+    console.log(this.vv);
+    //econsole.log(this.blackness, this.z, this.lightness);
 
 }
 
