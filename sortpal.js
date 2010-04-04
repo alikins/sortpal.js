@@ -1,11 +1,12 @@
 
 
-
 function compareRed(a,b){
-    return (a.red - b.red);
+    return (a['red'] - b['red']);
+    //    return (a.red - b.red);
 }
 
 function compareBlue(a,b) {
+    a['blue'];
 	return (a.blue - b.blue);
 }
 
@@ -99,7 +100,7 @@ function compareU(a,b) {
 }
 
 function compareV(a,b){
-    return (a.v - b.v);
+    return (a.vv - b.vv);
 }
 
 function compareCyan(a,b) {
@@ -332,7 +333,7 @@ function Color(rgb) {
     this.lightness = hsl[2];
     this.cr = yuv[0];
     this.u = yuv[1];
-    this.v = yuv[2];
+    this.vv = yuv[2];
     this.x = xyz[0];
     this.y = xyz[1];
     this.z = xyz[2];
@@ -357,32 +358,21 @@ Color.prototype = {
     }
 };
 
-//
-//function Sorter() {
-//    this.red = function(a,b) {
-//        return (a.red - b.red);
-//    }
-//
-//    this.green = function(a,b) {
-//        return (a.green - b.green);
-//   }
-//
-//    this.blue = function(a,b) {
-//        return (a.blue - b.blue);
-//    }
-//}
-//
-//function ColorList(colors) {
-//    this.list = colors;
-//}
-//
-//ColorList.prototype = {
-//    sorter: new Sorter(),
-//
-//    sorted: function(mode) {
-//            return this.list.sort(this.sorter[mode]);
-//    }
-//}
+
+function Sorter(sort) {
+    var sortvalue = sort;
+    var secsortvalue = 'sat';
+    this.cmp = function(a,b) {
+        var pri = (a[sortvalue] - b[sortvalue]);
+        if (pri === 0) {
+            return (a[secsortvalue] - b[secsortvalue]);
+        }
+        return pri;
+    }
+}
+
+
+
 
 function preComputeColors(colors) {
 	var colorspaces = [];
@@ -393,11 +383,51 @@ function preComputeColors(colors) {
 	return colorspaces;
 }
 
+function sortColors1(colors, sort) {
+    var sorter = new Sorter(sort);
+	var sortedColors = colors.slice(0);
+	sortedColors.sort(sorter.cmp);
+	return sortedColors;
+}
+
 function sortColors(colors, cmp) {
+
 	var sortedColors = colors.slice(0);
 	sortedColors.sort(cmp);
 	return sortedColors;
 }
+
+function ColorSorter(colors) {
+
+    var colors = colors;
+    var colorList = [];
+
+    this.color_sort = function(sort) {
+        var sorter = new Sorter(sort);
+        var sortedColors = colors.slice(0);
+        sortedColors.sort(sorter.cmp);
+        return sortedColors;
+    }
+
+    colorList.red = this.color_sort('red');
+    colorList.blue = this.color_sort('blue');
+    colorList.green = this.color_sort('green');
+
+    colorList.value = this.color_sort('value');
+    colorList.sat = this.color_sort('sat');
+    colorList.hue = this.color_sort('hue');
+
+    colorList.whiteness = this.color_sort('whiteness');
+    colorList.blackness = this.color_sort('blackness');
+
+
+
+    this.getColors = function() {
+        return colorList;
+    }
+}
+
+
 
 function drawColorList(colorlist){
     var y_offset = 0;
@@ -439,6 +469,7 @@ function drawPalette(palette, name) {
     // should probably fix the cmp's instead
     palette.reverse();
     for (i in palette){
+ //       console.log(palette[i]);
         ctx.strokeStyle = palette[i].hexrgb();
  //       ctx.strokeStyle = rgb(255,0,0);
         ctx.beginPath();
@@ -461,10 +492,18 @@ function updateTable(palette){
 
 	var colors = preComputeColors(rgbColors);
 
+
+    var blip = new ColorSorter(colors);
+    var foo = blip.getColors();
 	colors.sort();
-	colorList.red = sortColors(colors, compareRed);
-	colorList.green = sortColors(colors, compareGreen);
-	colorList.blue = sortColors(colors, compareBlue);
+    console.log(foo);
+//    colorList.red = sortColors1(colors, 'red');
+    colorList.red = foo.red;
+    colorList.blue = foo.blue;
+    //    colorList.blue = sortColors1(colors,'blue');
+//    colorList.red = sortColors(colors, compareRed);
+//	colorList.green = sortColors(colors, compareGreen);
+//	colorList.blue = sortColors(colors, compareBlue);
 	
 	colorList.purple = sortColors(colors, comparePurple);
 	colorList.blueGreen = sortColors(colors, compareBlueGreen);
@@ -487,14 +526,14 @@ function updateTable(palette){
 
     colorList.cr = sortColors(colors, compareCr);
     colorList.u = sortColors(colors, compareU);
-    colorList.v = sortColors(colors, compareV);
+    colorList.vv = sortColors(colors, compareV);
 	
 	colorList.whiteness = sortColors(colors, compareWhiteness).reverse();
 	colorList.blackness = sortColors(colors, compareBlackness).reverse();
 	
 	colorList.cyan = sortColors(colors, compareCyan);
 	colorList.magenta = sortColors(colors, compareMagenta);
-	colorList.yellow = sortColors(colors, compareYellow);
+	colorList.yellow = sortColors(colors, new Sorter('yellow').cmp);
 //	colorList['black'] = sortColors(colors, compareBlack);
 	
 //	table = "<TABLE id=palette_table width=100% BORDER=0 CELLSPACING=0 CELLPADDING=0>";
@@ -507,8 +546,10 @@ function updateTable(palette){
 
  
 
-    drawColorList(colorList);
-//	for (j in colorList) {
+   // drawColorList(colorList);
+   drawColorList(foo);
+
+    //	for (j in colorList) {
 //        drawPalette(colorList[j]);
 //    }
 	//for (j in colorList) {
