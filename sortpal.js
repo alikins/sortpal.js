@@ -1,119 +1,10 @@
 
 
-function compareRed(a,b){
-    return (a['red'] - b['red']);
-    //    return (a.red - b.red);
-}
 
-function compareBlue(a,b) {
-    a['blue'];
-	return (a.blue - b.blue);
-}
 
-function compareGreen(a,b) {
-	return (a.green - b.green);
-}
-
-function comparePurple(a,b) {
-	return ((a.red * a.blue) - (b.red * b.blue));
-}
-
-function compareBlueGreen(a,b) {
-	return ((a.blue * a.green) - (b.blue * b.green));
-}
-
-function compareBrown(a,b) {
-	return ((a.red * b.green) - (b.red * b.green));
-}
-
-function compareTotal(a,b) {
-	return ( (a.red+a.green+a.blue) - (b.red+b.green+b.blue));
-}
-
-function compareX(a,b) {
-	return (a.x - b.x);
-	}
-	
-function compareY(a,b) {
-	return (a.y - b.y);
-}	
-
-function compareZ(a,b) {
-	return (a.z - b.z);
-}	
-
-function compareHue(a,b) {
-	return (a.hue - b.hue);
-}
-
-function compareSat(a,b) {
-	return (a.sat - b.sat);
-}
-
-function compareValue(a,b) {
-	return (a.value - b.value);
-}
-
-function compareChroma(a,b) {
-    return (a.chroma - b.chroma);
-}
-
-function compareLightness(a,b) {
-	return (a.lightness - b.lightness);
-}
-	
 function distFrom0(x,y,z){
 	return Math.sqrt( (Math.pow(x,2) + Math.pow(y,2) + Math.pow(z,2) ) );
 	}
-
-// HSV space is sorta/kindof a cylinder, so this should sort of work
-// not sure what the best reference point here is. 
-function compare3dHsv(a,b) {
-	return(distFrom0(a.hue, a.sat, a.value) - distFrom0(b.hue, b.sat, b.value));
-}
-
-function compare3dHsl(a,b){
-    return(distFrom0(a.hue, a.sat,a.lightness) - distFrom0(b.hue, b.sat, b.lightness));
-}
-
-function compare3dRgb(a,b) {
-	// distance from 0,0,0 in rgb space
-	return (distFrom0(a.red, a.green, a.blue) - distFrom0(b.red, b.green, b.blue));
-}
-
-function compareWhiteness(a,b) {
-	
-	return (a.whiteness - b.whiteness);
-}
-
-function compareBlackness(a,b) {
-	
-	return (a.blackness - b.blackness);
-}
-
-function compareCr(a,b) {
-        return (a.cr -b.cr);
-}
-
-function compareU(a,b) {
-    return (a.u - b.u);
-}
-
-function compareV(a,b){
-    return (a.vv - b.vv);
-}
-
-function compareCyan(a,b) {
-	return (a.cyan - b.cyan);
-}
-
-function compareMagenta(a,b) {
-	return (a.magenta - b.magenta);
-}
-
-function compareYellow(a,b) {
-	return (a.yellow - b.yellow);
-}
 
 
 //http://www.fourcc.org/fccyvrgb.php 
@@ -123,7 +14,7 @@ function rgb_to_yuv(rgb) {
  //  V = Ecb = 0.564(B - Er) = -0.169R - 0.331G + 0.500B (Gregory Smith points out that Er here should read Ey - equations above were corrected)
     y = (0.299 * rgb[0])  + (0.587 * rgb[1]) + (0.114 * rgb[2]);
     u = (.5 * rgb[0]) - (0.419 * rgb[1]) - (0.081 * rgb[2]);
-    v = (-0.169 * rgb[0])  - (0.331 * rgb[1]) + (0.5 * rgb[3]);
+    v = (-0.169 * rgb[0])  - (0.331 * rgb[1]) + (0.5 * rgb[2]);
 
     return [y,u,v];
 }
@@ -318,6 +209,15 @@ function Color(rgb) {
     this.green = rgb[1];
     this.blue = rgb[2];
 
+    // precompute these
+    this.purple = (this.red * this.blue);
+    this.blueGreen = (this.blue * this.green);
+    this.brown = (this.red * this.green);
+
+    this.total = (this.red + this.green + this.blue);
+
+    this.rgb3d = distFrom0(this.red, this.green, this.blue);
+
     hsvc = rgb_to_hsvc(rgb);
     hsl = rgb_to_hsl(rgb);
     hwb = rgb_to_hsl(rgb);
@@ -327,16 +227,26 @@ function Color(rgb) {
     this.hue = hsvc[0];
     this.sat = hsvc[1];
     this.value = hsvc[2];
+
+
+    this.hsv3d = distFrom0(this.hue, this.sat, this.value);
+
     this.chroma = hsvc[3];
+
     this.whiteness = hwb[1];
     this.blackness = hwb[2];
+
     this.lightness = hsl[2];
+    this.hsl3d = distFrom0(this.hue, this.sat, this.lightness);
+
     this.cr = yuv[0];
     this.u = yuv[1];
     this.vv = yuv[2];
+
     this.x = xyz[0];
     this.y = xyz[1];
     this.z = xyz[2];
+
     this.cyan = cmyk[0];
     this.magenta = cmyk[1];
     this.yellow = cmyk[2];
@@ -383,48 +293,73 @@ function preComputeColors(colors) {
 	return colorspaces;
 }
 
-function sortColors1(colors, sort) {
-    var sorter = new Sorter(sort);
-	var sortedColors = colors.slice(0);
-	sortedColors.sort(sorter.cmp);
-	return sortedColors;
-}
-
-function sortColors(colors, cmp) {
-
-	var sortedColors = colors.slice(0);
-	sortedColors.sort(cmp);
-	return sortedColors;
-}
 
 function ColorSorter(colors) {
 
     var colors = colors;
     var colorList = [];
 
-    this.color_sort = function(sort) {
+    // sort by a specific attribute
+    this.attrSort = function(sort) {
         var sorter = new Sorter(sort);
         var sortedColors = colors.slice(0);
         sortedColors.sort(sorter.cmp);
         return sortedColors;
     }
 
-    colorList.red = this.color_sort('red');
-    colorList.blue = this.color_sort('blue');
-    colorList.green = this.color_sort('green');
+    colorList.red = this.attrSort('red');
+    colorList.blue = this.attrSort('blue');
+    colorList.green = this.attrSort('green');
 
-    colorList.value = this.color_sort('value');
-    colorList.sat = this.color_sort('sat');
-    colorList.hue = this.color_sort('hue');
+    colorList.purple = this.attrSort('purple');
+    colorList.blueGreen = this.attrSort('blueGreen');
+    colorList.brown = this.attrSort('brown');
 
-    colorList.whiteness = this.color_sort('whiteness');
-    colorList.blackness = this.color_sort('blackness');
+    colorList.total = this.attrSort('total');
 
+    colorList.value = this.attrSort('value');
+    colorList.sat = this.attrSort('sat');
+    colorList.hue = this.attrSort('hue');
 
+    colorList.whiteness = this.attrSort('whiteness');
+    colorList.blackness = this.attrSort('blackness');
+
+    colorList.cr = this.attrSort('cr');
+    colorList.u = this.attrSort('u');
+    colorList.vv = this.attrSort('vv');
+
+    colorList.chroma = this.attrSort('chroma');
+    colorList.lightness = this.attrSort('lightness');
+
+    colorList.x = this.attrSort('x');
+    colorList.y = this.attrSort('y');
+    colorList.z = this.attrSort('z');
+
+    colorList.cyan = this.attrSort('cyan');
+    colorList.magenta = this.attrSort('magenta');
+    colorList.yellow = this.attrSort('yellow');
+
+    colorList.rgb3d = this.attrSort('rgb3d');
+    colorList.hsv3d = this.attrSort('hsv3d');
+    colorList.hsl3d = this.attrSort('hsl3d');
 
     this.getColors = function() {
         return colorList;
     }
+
+    this.comparePurple = function(a,b) {
+        return ((a.red * a.blue) - (b.red * b.blue));
+    }
+
+ //   function compareBlueGreen(a,b) {
+ //       return ((a.blue * a.green) - (b.blue * b.green));
+ //   }
+
+ //   function compareBrown(a,b) {
+ //       return ((a.red * b.green) - (b.red * b.green));
+ //   }
+
+
 }
 
 
@@ -487,78 +422,23 @@ function updateTable(palette){
 	var colorList = [];
 	var rgbColors = getColors(palette);
 
- //   var cl = new ColorList(rgbColors);
- //   var blip = cl.sorted('red');
-
 	var colors = preComputeColors(rgbColors);
 
 
     var blip = new ColorSorter(colors);
     var foo = blip.getColors();
-	colors.sort();
-    console.log(foo);
-//    colorList.red = sortColors1(colors, 'red');
-    colorList.red = foo.red;
-    colorList.blue = foo.blue;
-    //    colorList.blue = sortColors1(colors,'blue');
-//    colorList.red = sortColors(colors, compareRed);
-//	colorList.green = sortColors(colors, compareGreen);
-//	colorList.blue = sortColors(colors, compareBlue);
-	
-	colorList.purple = sortColors(colors, comparePurple);
-	colorList.blueGreen = sortColors(colors, compareBlueGreen);
-	colorList.brown = sortColors(colors, compareBrown);
 
-	colorList.total = sortColors(colors, compareTotal);
-	colorList.rgb3d = sortColors(colors, compare3dRgb).reverse();
-	colorList.hsv3d = sortColors(colors, compare3dHsv);
-	colorList.hsl3d = sortColors(colors, compare3dHsl);
-
-	colorList.x = sortColors(colors, compareX).reverse();
-	colorList.y = sortColors(colors, compareY).reverse();
-	colorList.z = sortColors(colors, compareZ).reverse();
-	
-	colorList.hue = sortColors(colors, compareHue);
-	colorList.sat = sortColors(colors, compareSat);
-	colorList.value = sortColors(colors, compareValue).reverse();
-    colorList.chroma = sortColors(colors, compareChroma);
-	colorList.lightness = sortColors(colors, compareLightness);
-
-    colorList.cr = sortColors(colors, compareCr);
-    colorList.u = sortColors(colors, compareU);
-    colorList.vv = sortColors(colors, compareV);
-	
-	colorList.whiteness = sortColors(colors, compareWhiteness).reverse();
-	colorList.blackness = sortColors(colors, compareBlackness).reverse();
-	
-	colorList.cyan = sortColors(colors, compareCyan);
-	colorList.magenta = sortColors(colors, compareMagenta);
-	colorList.yellow = sortColors(colors, new Sorter('yellow').cmp);
-//	colorList['black'] = sortColors(colors, compareBlack);
-	
-//	table = "<TABLE id=palette_table width=100% BORDER=0 CELLSPACING=0 CELLPADDING=0>";
-//	table = table + "<thead><tr><th>Red</th><th>Green</th><th>Blue</th><th>rgb</th><th>X</th><th>Y</th><th>Z</th><th>Hue</th><th>Sat</th><th>Value</th><th>whiteness</th><th>blackness</th></tr></thead>";
-	
-//	document.write("<TABLE id=palette_table width=100% BORDER=0 CELLSPACING=0 CELLPADDING=0>");
-//	document.write("<thead><tr><th>Red</th><th>Green</th><th>Blue</th><th>rgb</th><th>X</th><th>Y</th><th>Z</th><th>Hue</th><th>Sat</th><th>Value</th><th>whiteness</th><th>blackness</th></tr></thead>");
+//	colorList.total = sortColors(colors, compareTotal);
+//	colorList.rgb3d = sortColors(colors, compare3dRgb).reverse();
+//	colorList.hsv3d = sortColors(colors, compare3dHsv);
+//	colorList.hsl3d = sortColors(colors, compare3dHsl);
 
 	table = document.getElementById('palette_table');
 
- 
 
    // drawColorList(colorList);
    drawColorList(foo);
 
-    //	for (j in colorList) {
-//        drawPalette(colorList[j]);
-//    }
-	//for (j in colorList) {
-	//	writeTableRow(j, table, colorList[j]);
-	//	}
-    //$('palette_table').replaceWith(table);
-
-           
-  
   } 
       
 function writeTableRow(name, table, colors) {
