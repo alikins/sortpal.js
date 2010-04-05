@@ -21,7 +21,7 @@ function rgb_to_yuv(rgb) {
 
     // This method is wrong
     
-    return [y+1 ,u,v+1];
+    return [y ,u,v];
 }
 
 
@@ -218,7 +218,7 @@ function Color(rgb) {
     this.cyan = cmyk[0];
     this.magenta = cmyk[1];
     this.yellow = cmyk[2];
-    console.log(this.vv);
+    //console.log(this.vv);
     //econsole.log(this.blackness, this.z, this.lightness);
 
 }
@@ -328,18 +328,14 @@ function ColorSorter(colors) {
 
 
 function drawColorList(colorlist){
-    var y_offset = 0;
-    var y_spacing = 25;
     var t = document.getElementById('palette_table');
     for (l in colorlist) {
 
-        row = t.insertRow(0);
-        var label = row.insertCell(0);
-        label.innerHTML = l;
-        var canvasCell = row.insertCell(0);
-        canvasCell.appendChild(drawPalette(colorlist[l], y_offset, l));
-
-        y_offset = y_offset + y_spacing;
+       row = t.insertRow(0);
+       var label = row.insertCell(0);
+       label.innerHTML = l;
+       var canvasCell = row.insertCell(0);
+       canvasCell.appendChild(drawPalette(colorlist[l]));
 
        var label2 = row.insertCell(0);
        label2.innerHTML = l;
@@ -348,7 +344,7 @@ function drawColorList(colorlist){
 
 }
 
-function drawPalette(palette, name) {
+function drawPalette(palette) {
 
     var canvas = document.createElement('canvas');
     canvas.id = l;
@@ -387,8 +383,6 @@ function updateTable(palette){
     var color_sorter = new ColorSorter(colors);
     var color_list = color_sorter.getColors();
 
-	table = document.getElementById('palette_table');
-
     drawColorList(color_list);
 
   } 
@@ -400,8 +394,7 @@ function writeTableRow(name, table, colors) {
 	for (i in colors ) {
 		var cell = row.insertCell(0);
 		cell.bgColor = colors[i].hexrgb();
-		cell.innerHTML = "&nbsp;";	
-//		document.getElementById('palette_table');			
+		cell.innerHTML = "&nbsp;";			
 	}
 	var cell = row.insertCell(0);
 	cell.innerHTML = name;
