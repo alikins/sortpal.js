@@ -349,24 +349,40 @@ function drawPalette(palette) {
     var canvas = document.createElement('canvas');
     canvas.id = l;
 
+
+    var w = document.width;
+    var h = document.height;
+    var t = document.getElementById('palette_table');
+
+
+
+    // using document.width doesn't work because it changes as the
+    // page renders. using width of the row element doesn't seem
+    // much better
+    var needed_w = (w/palette.length);
     var height = 24;
     var width = 4;
+    if (width < needed_w) { width = needed_w;}
+   // var width = needed_w;
 
     canvas.height = height;
-    canvas.width = (width*(palette.length+2));
+    canvas.width = (width*(palette.length));
 
     var ctx = canvas.getContext("2d");
 
+    //console.log(width);
     ctx.lineWidth = width;
-    var count = 1;
+    var count = 0;
+    // we start drawing at half the width of the line, so the line's left side is at 0
+    var start_x = width/2;
 
     // should probably fix the cmp's instead
     palette.reverse();
     for (i in palette){
         ctx.strokeStyle = palette[i].hexrgb();
         ctx.beginPath();
-        ctx.moveTo((count*width),0);
-        ctx.lineTo((count*width),height);
+        ctx.moveTo(start_x+(count*width),0);
+        ctx.lineTo(start_x+(count*width),height);
         ctx.stroke();
         count++;
     }
