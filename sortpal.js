@@ -8,7 +8,10 @@ function unique(a)
 	{
 		for(var x = 0, y = r.length; x < y; x++)
 		{
-			if(r[x]==a[i]) continue o;
+			if((r[x][0]==a[i][0]) && (r[x][1]==a[i][1]) && (r[x][2]==a[i][2])) {
+//				console.log("dupe" + r[x][0] + " " + a[x][0] + " " + r[x][1] + " " + a[x][1]);
+				continue o;
+			} 
 		}
 	r[r.length] = a[i];
 	}
