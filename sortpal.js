@@ -68,34 +68,33 @@ function rgb_to_hwb(rgb) {
 
 // from http://www.kourbatov.com/faq/rgb2cmyk.htm
 function rgb_to_cmyk (rgb) {
- computedC = 0;
- computedM = 0;
- computedY = 0;
- computedK = 0;
+	computedC = 0;
+	computedM = 0;
+	computedY = 0;
+	computedK = 0;
 
- // trim leading/trailing spaces from input RGB values
- var r = rgb[0];
- var g = rgb[1];
- var b = rgb[2];
+	var r = rgb[0];
+	var g = rgb[1];
+	var b = rgb[2];
 
- // BLACK
- if (r===0 && g===0 && b===0) {
-  computedK = 1;
-  return [0,0,0,1];
- }
+	// BLACK
+	if (r==0 && g==0 && b==0) {
+		computedK = 1;
+		return [0,0,0,1];
+	}
 
- computedC = 1 - (r/255);
- computedM = 1 - (g/255);
- computedY = 1 - (b/255);
+	computedC = 1 - (r/255);
+	computedM = 1 - (g/255);
+	computedY = 1 - (b/255);
 
- var minCMY = Math.min(computedC,Math.min(computedM,computedY));
+	var minCMY = Math.min(computedC, Math.min(computedM, computedY));
 
- computedC = (computedC - minCMY) / (1 - minCMY) ;
- computedM = (computedM - minCMY) / (1 - minCMY) ;
- computedY = (computedY - minCMY) / (1 - minCMY) ;
- computedK = minCMY;
+	computedC = (computedC - minCMY) / (1 - minCMY) ;
+	computedM = (computedM - minCMY) / (1 - minCMY) ;
+	computedY = (computedY - minCMY) / (1 - minCMY) ;
+	computedK = minCMY;
 
- return [computedC,computedM,computedY,computedK];
+	return [computedC, computedM, computedY, computedK];
 }
 
 // from http://mjijackson.com/2008/02/rgb-to-hsl-and-rgb-to-hsv-color-model-conversion-algorithms-in-javascript
@@ -232,7 +231,6 @@ function Color(rgb) {
     this.cyan = cmyk[0];
     this.magenta = cmyk[1];
     this.yellow = cmyk[2];
-    //console.log(this.vv);
     //econsole.log(this.blackness, this.z, this.lightness);
 
 }
@@ -255,6 +253,7 @@ Color.prototype = {
 
 function Sorter(sort) {
     var sortvalue = sort;
+	// secondary and tertiary sorts to try to stabilize the sort
     var secsortvalue = 'hsv3d';
     var tertsortvalue = 'chroma';
     this.cmp = function(a,b) {
@@ -333,6 +332,7 @@ function ColorSorter(colors) {
     colorList.hsv3d = this.attrSort('hsv3d');
     colorList.hsl3d = this.attrSort('hsl3d');
 
+	//console.log(colorList.yellow);
     this.getColors = function() {
         return colorList;
     }
@@ -352,6 +352,7 @@ function drawColorList(colorlist){
 	}
 
 	
+//	cl = [colorlist.yellow];
     for (l in colorlist) {
 
        row = t.insertRow(0);
@@ -399,6 +400,7 @@ function drawPalette(palette) {
     // should probably fix the cmp's instead
     palette.reverse();
     for (i in palette){
+		//console.log(palette[i].yellow);
         ctx.strokeStyle = palette[i].hexrgb();
         ctx.beginPath();
         ctx.moveTo(start_x+(count*width),0);
