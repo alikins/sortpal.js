@@ -190,10 +190,11 @@ function genColors() {
 
 
 function Color(rgb) {
-    this.red = rgb[0];
-    this.green = rgb[1];
-    this.blue = rgb[2];
-
+    this.red = parseFloat(rgb[0]);
+    this.green = parseFloat(rgb[1]);
+    this.blue = parseFloat(rgb[2]);
+	console.log(this.red + " " + this.green + " " + this.blue);
+	
     // precompute these
     this.purple = (this.red * this.blue);
     this.blueGreen = (this.blue * this.green);
@@ -302,6 +303,7 @@ function ColorSorter(colors) {
     colorList.red = this.attrSort('red');
     colorList.blue = this.attrSort('blue');
     colorList.green = this.attrSort('green');
+	
 
     colorList.purple = this.attrSort('purple');
     colorList.blueGreen = this.attrSort('blueGreen');
@@ -385,7 +387,7 @@ function drawPalette(palette) {
 	//console.log(palette.length);
     var needed_w = (w/palette.length);
     var height = 24;
-    var width = 4;
+    var width = 1;
     if (width < needed_w) { width = needed_w;}
    // var width = needed_w;
 
