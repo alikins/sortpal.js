@@ -19,6 +19,18 @@ function unique(a)
 }
 
 
+function gup( name )
+{
+  name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
+  var regexS = "[\\?&]"+name+"=([^&#]*)";
+  var regex = new RegExp( regexS );
+  var results = regex.exec( window.location.href );
+  if( results == null )
+    return "";
+  else
+    return results[1];
+}
+
 function distFrom0(x,y,z){
 	return Math.sqrt( (Math.pow(x,2) + Math.pow(y,2) + Math.pow(z,2) ) );
 	}
