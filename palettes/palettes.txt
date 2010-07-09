@@ -1,15 +1,18 @@
 13bow
 Ega
 HuesAndSaturations
+Named_Colors
 Web
 blues
 browns
 chroma
+cranes
 cycler
 firestrm
 grays
 greenBlues
 greens
+hilbert_rgb
 print
 purples
 reds
@@ -23,3 +26,4 @@ volcano4
 volcano5
 volcano6
 volcano7
+xkcd

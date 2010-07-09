@@ -192,9 +192,7 @@ function genColors() {
 function Color(rgb) {
     this.red = parseFloat(rgb[0]);
     this.green = parseFloat(rgb[1]);
-    this.blue = parseFloat(rgb[2]);
-	console.log(this.red + " " + this.green + " " + this.blue);
-	
+    this.blue = parseFloat(rgb[2]);	
     // precompute these
     this.purple = (this.red * this.blue);
     this.blueGreen = (this.blue * this.green);
@@ -376,7 +374,9 @@ function drawColorList(colorlist){
 function drawPalette(palette) {
     var canvas = document.createElement('canvas');
     canvas.id = l;
-	
+
+
+    var w_w = window.innerWidth;	
     var w = document.width;
     var h = document.height;
     var t = document.getElementById('palette_table');
@@ -384,9 +384,13 @@ function drawPalette(palette) {
     // using document.width doesn't work because it changes as the
     // page renders. using width of the row element doesn't seem
     // much better
+    //console.log(w_h)
 	//console.log(palette.length);
-    var needed_w = (w/palette.length);
-    var height = 24;
+
+    // the 160 is just a guessed fudge factor so we take into about
+    // most of the size of the text, approximately. 
+    var needed_w = ((w_w-160)/palette.length);
+    var height = 20;
     var width = 1;
     if (width < needed_w) { width = needed_w;}
    // var width = needed_w;
@@ -456,7 +460,7 @@ function trim(stringToTrim) {
 
 
 function getPalettes() {
-	var xhttp = XMLHttpRequest();
+	var xhttp = new XMLHttpRequest();
 	var filename = "palettes/palettes.txt";
     xhttp.open("GET",filename,false);
     xhttp.send("");
@@ -512,7 +516,7 @@ function parseGpl(gpl){
 
 function getColors(palette){
 
-    var xhttp = XMLHttpRequest();
+    var xhttp = new XMLHttpRequest();
 	var filename = "palettes/"+palette+".gpl";
 	//console.log(filename);
     xhttp.open("GET",filename,false);

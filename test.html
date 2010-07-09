@@ -4,33 +4,22 @@
 <style type="text/css">
     a.test { font-weight: bold; }
     body { color:#ffffff; }
- </style>
- 
+ </style> 
  <script type="text/javascript" src="sortpal.js"></script>
  <script type="text/javascript" src="jquery.js"></script>
-
 <script type="text/javascript">
 function update_palette() {
 	var _f = document.palette_select;
-	var _palette = _f.getElementsByTagName("select")[0].value;
-	
-	console.log(_palette);
-	//console.log(
-	    $(document).ready(function() { updateTable(_palette) });
+	var _palette = _f.getElementsByTagName("select")[0].value;	
+	$(document).ready(function() { updateTable(_palette) });
      };
-
-
 </script>
+
 </head>
 
-
 <body bgcolor="#000000"> 
-
-
 <form id="palette_select" name="palette_select">
 <input type=button onclick="update_palette()" value="Show">
-
-
 </form>
 
 <div id="main">
@@ -51,12 +40,10 @@ function update_palette() {
 	o.value = pl[p]; 
 	s.appendChild(o);
 	}
- f.appendChild(s);
- 
 
-	
-	      $(document).ready(function(){
-       updateTable('Named_Colors');
+      f.appendChild(s);
+      $(document).ready(function(){
+       updateTable('xkcd');
      //  updateTable('warm');
      });
 
