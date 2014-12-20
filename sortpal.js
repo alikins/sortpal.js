@@ -31,22 +31,54 @@ function gup( name )
     return results[1];
 }
 
-function distFrom0(x,y,z){
+// euclidean distance from 0,0,0
+function distFrom0(x,y,z) {
 	return Math.sqrt( (Math.pow(x,2) + Math.pow(y,2) + Math.pow(z,2) ) );
-	}
+}
 
+function unsquaredDistFrom0(x,y,z) {
+    return (Math.pow(x,2) + Math.pow(y,2) + Math.pow(z,2));
+}
+
+function weightedRGBHighRedDistFrom0(x,y,z) {
+	return Math.sqrt( (3*Math.pow(x,2) + 4*Math.pow(y,2) + 2*Math.pow(z,2) ) );
+}
+
+function weightedRGBLowRedDistFrom0(x,y,z) {
+	return Math.sqrt( (2*Math.pow(x,2) + 4*Math.pow(y,2) + 3*Math.pow(z,2) ) );
+}
+
+function weightedRGBDistFrom0(x,y,z) {
+    if (x >= 128 ) {
+        var dist = weightedRGBHighRedDistFrom0(x,y,z);
+    } else {
+        var dist = weightedRGBLowRedDistFrom0(x,y,z);
+    }
+    return dist;
+}
+
+//white point
+var WHITE = {X: 0.9505, Y: 1.0000, Z: 1.0890};
 
 //http://www.fourcc.org/fccyvrgb.php 
 function rgb_to_yuv(rgb) {
  //   Ey = 0.299R + 0.587G + 0.114B
  //  U = Ecr = 0.713(R - Ey) = 0.500R - 0.419G - 0.081B
- //  V = Ecb = 0.564(B - Er) = -0.169R - 0.331G + 0.500B (Gregory Smith points out that Er here should read Ey - equations above were corrected)
+ //  V = Ecb = 0.564(B - Er) = -0.169R - 0.331G + 0.500B
+//  (Gregory Smith points out that Er here should read Ey - equations above were corrected)
+
+// http://www.compuphase.com/cmetric.htm references
+    // from gamma corrected rgb
+// y = 0.299R + 0.587G + 0.114B
+// u = -0.147R + -0.289G + 0.463B
+// v = 0.615R - 0.515G - 0.100B
+    
     var r = rgb[0]/255;
     var g = rgb[1]/255;
     var b = rgb[2]/255;
     y = (0.299 * r)  + (0.587 * g) + (0.114 * b);
     u = (.5 * r) - (0.419 * g) - (0.081 * b);
-    v = (-0.169 * r)  - (0.331 * g) + (0.5 * b);
+    v = (-0.169 * r) - (0.331 * g) + (0.5 * b);
 
     // This method is wrong
     
@@ -67,6 +99,53 @@ function rgb_to_xyz(rgb) {
 	return xyz;
 }
 
+function f_f(t) {
+    if ( t > ( 6.0 / 29.0 ) * ( 6.0 / 29.0 ) * (6.0 / 29.0 ) ) {
+        return Math.pow( t, 1.0 / 3.0 );
+    } else {
+        return ( 1.0 / 3.0 ) * 
+            ( 29.0 / 6.0 ) * ( 29.0 / 6.0 ) * t +
+            4.0 / 29.0;
+    }
+}
+
+// from http://stevehanov.ca/colours/Colours.js
+function xyz_to_lab(xyz) {
+
+    var X = f_f( xyz[0] / WHITE.X );
+    var Y = f_f( xyz[1] / WHITE.Y );
+    var Z = f_f( xyz[2] / WHITE.Z );
+
+    color =  [116 * Y - 16,
+              500 * ( X - Y ),
+              200 * ( Y - Z )];
+//    console.log(color[0],color[1], color[2])
+    return color;
+}
+
+function xyz_to_luv(xyz) {
+    var Y = f_f( xyz[1] / WHITE.Y );
+    var _L = 116 * Y -16;
+    if (_L == 0) {
+        return [0,0,0];
+    }
+
+    var _X = xyz[0];
+    var _Y = xyz[1];
+    var _Z = xyz[2];
+
+    var var_U = (4 * _X) / (_X + (15 * _Y) + (3 * _Z));
+    var ref_U = (4 * WHITE.X) / (_X + (15 * WHITE.Y) + (3 * WHITE.Z));
+    var var_V = (9 * _Y) / (_X + (15 * _Y) + (3 * _Z));
+    var ref_V = (9 * WHITE.X) / (_X + (15 * WHITE.Y) + (3 * WHITE.Z));
+
+    var _U = 13 * _L * (var_U - ref_U);
+    var _V = 13 * _L * (var_V - ref_V);
+
+    color = [_L, _U, _V];
+    console.log(_L, _U, _V);
+    return color;
+}
 
 function rgb_to_hwb(rgb) {
 	var min = Math.min(rgb[0], rgb[1], rgb[2]);
@@ -145,7 +224,7 @@ function rgb_to_hsvc(rgb){
 	 var r = rgb[0];
 	 var g = rgb[1];
 	 var b = rgb[2];
-	 
+    
     r = r/255;
     g = g/255;
     b = b/255;
@@ -213,13 +292,18 @@ function Color(rgb) {
     this.total = (this.red + this.green + this.blue);
 
     this.rgb3d = distFrom0(this.red, this.green, this.blue);
+    this.rgb3dweighted = weightedRGBDistFrom0(this.red, this.green, this.blue);
+    this.rgbd3weightedhigh = weightedRGBHighRedDistFrom0(this.red, this.green, this.blue);
 
     hsvc = rgb_to_hsvc(rgb);
     hsl = rgb_to_hsl(rgb);
     hwb = rgb_to_hwb(rgb);
     xyz = rgb_to_xyz(rgb);
+    lab = xyz_to_lab(xyz);
     cmyk = rgb_to_cmyk(rgb);
     yuv = rgb_to_yuv(rgb);
+    luv = xyz_to_luv(xyz);
+
     this.hue = hsvc[0];
     this.sat = hsvc[1];
     this.value = hsvc[2];
@@ -241,6 +325,21 @@ function Color(rgb) {
     this.x = xyz[0];
     this.y = xyz[1];
     this.z = xyz[2];
+
+    this.xyz3d = distFrom0(this.x, this.y, this.z);
+
+    this.l = lab[0];
+    this.a = lab[1];
+    this.b = lab[2];
+
+    this.ll = luv[0];
+    this.uu = luv[1];
+    this.vvv = luv[2];
+
+    // lab is supposed to map euclidian 3d distance to perceptive color
+    this.lab3d = distFrom0(this.l, this.a, this.b);
+    this.luv3d = distFrom0(this.ll, this.uu, this.vvv);
+    //this.luv3dunsquared = unsquaredDistFrom0(this.ll, this.uu, this.vvv);
 
     this.cyan = cmyk[0];
     this.magenta = cmyk[1];
@@ -271,14 +370,14 @@ function Sorter(sort) {
     var secsortvalue = 'hsv3d';
     var tertsortvalue = 'chroma';
     this.cmp = function(a,b) {
-        var pri = (a[sortvalue] - b[sortvalue]);
-        if (pri === 0) {
-            var sec = (a[secsortvalue] - b[secsortvalue]);
-            if (sec === 0) {
-                return (a[tertsortvalue] - b[tertsortvalue]);
-            }
-            return sec;
-        }
+        var pri = a[sortvalue] - b[sortvalue];
+        //if (pri === 0) {
+        //    var sec = (a[secsortvalue] - b[secsortvalue]);
+        //    if (sec === 0) {
+        //        return (a[tertsortvalue] - b[tertsortvalue]);
+        //    }
+        //    return sec;
+        //}
         return pri;
     }
 }
@@ -313,7 +412,6 @@ function ColorSorter(colors) {
     colorList.red = this.attrSort('red');
     colorList.blue = this.attrSort('blue');
     colorList.green = this.attrSort('green');
-	
 
     colorList.purple = this.attrSort('purple');
     colorList.blueGreen = this.attrSort('blueGreen');
@@ -339,13 +437,27 @@ function ColorSorter(colors) {
     colorList.y = this.attrSort('y');
     colorList.z = this.attrSort('z');
 
+    colorList.l = this.attrSort('l');
+    colorList.a = this.attrSort('a');
+    colorList.b = this.attrSort('b');
+
+    colorList.ll = this.attrSort('ll');
+    colorList.uu = this.attrSort('uu');
+    colorList.vvv = this.attrSort('vvv');
+
     colorList.cyan = this.attrSort('cyan');
     colorList.magenta = this.attrSort('magenta');
     colorList.yellow = this.attrSort('yellow');
 
     colorList.rgb3d = this.attrSort('rgb3d');
+    colorList.rgb3dweighted = this.attrSort('rgb3dweighted');
+    colorList.rgb3dweightedhigh = this.attrSort('rgb3dweightedhigh');
     colorList.hsv3d = this.attrSort('hsv3d');
     colorList.hsl3d = this.attrSort('hsl3d');
+    colorList.xyz3d = this.attrSort('xyz3d');
+    colorList.lab3d = this.attrSort('lab3d');
+    colorList.luv3d = this.attrSort('luv3d');
+    //colorList.luv3dunsquared = this.attrSort('luv3dunsquared');
 
 	//console.log(colorList.yellow);
     this.getColors = function() {
@@ -501,11 +613,11 @@ function parseGpl(gpl){
     //console.log(lines[0]);
     lines = lines.splice(3);
     for (line in lines) {
-         line_buf = trim(lines[line]);
+        var line_buf = trim(lines[line]);
 
-        regex =  /(\d+)\D*?(\d+)\D*?(\d+).*/g ;
-        var reg = line_buf.match(regex);
-        var results = regex.exec();
+        var line_regex =  /(\d+)\D*?(\d+)\D*?(\d+).*/ ;
+        var results = line_buf.match(line_regex);
+        //var results = line_buf.test(line_regex);
 
         if (results) {
             r = results[1];
