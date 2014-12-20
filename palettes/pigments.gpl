@@ -1,0 +1,44 @@
+GIMP Palette
+Name: pigments
+Columns: 16
+#
+17  21  25		carbonblack
+ 27  32  35		boneblack
+ 51  25   5		redochre
+ 51  25   5		umber
+ 13  33  49		indigo
+  6  57  94		cobaltblue
+  2  69 121		prussianblue
+ 32  53 109		smalt
+  1  80 137		ultramarine
+ 32  80 114		azurite
+  0  95 148		egyptianblue
+ 42 112 150		ceruleanblue
+ 72  94  77		greenearth
+ 60 125  65		emeraldgreen
+ 33 124  80		viridian
+241 246 240		titaniumwhite
+251 251 251		leadwhite
+235 242 234		limewhite
+235 242 234		zincwhite
+ 94 141  98		cobaltgreen
+113 155 109		verdigris
+122 159 100		malachite
+204 149  80		yellowochre
+254 253  28		leadtinyellow
+254 253  28		lemonyellow
+250 186  33		naplesyellow
+242 182  37		cobaltyellow
+242 182  57		orpiment
+226 177  27		chromeyellow
+ 55 134  56		copperresinate
+197  56  35		redlead
+172  33  10		chromeorange
+195  38   8		vermilion
+179  28  46		madder
+253  64   2		cadmiumyellowred
+252 126  13		realgar
+254 153  26		indianyellow
+166  55  74		carmine
+119  58 116		cobaltviolet
+ 96  59  42		vandykebrown
