@@ -1,6 +1,4 @@
 
-
-
 function unique(a)
 {
 	var r = new Array();
@@ -11,7 +9,7 @@ function unique(a)
 			if((r[x][0]==a[i][0]) && (r[x][1]==a[i][1]) && (r[x][2]==a[i][2])) {
 //				console.log("dupe" + r[x][0] + " " + a[x][0] + " " + r[x][1] + " " + a[x][1]);
 				continue o;
-			} 
+			}
 		}
 	r[r.length] = a[i];
 	}
@@ -58,6 +56,7 @@ function weightedRGBDistFrom0(x,y,z) {
 }
 
 //white point
+// afaict, this is "D65"
 var WHITE = {X: 0.9505, Y: 1.0000, Z: 1.0890};
 
 //http://www.fourcc.org/fccyvrgb.php 
@@ -72,7 +71,6 @@ function rgb_to_yuv(rgb) {
 // y = 0.299R + 0.587G + 0.114B
 // u = -0.147R + -0.289G + 0.463B
 // v = 0.615R - 0.515G - 0.100B
-    
     var r = rgb[0]/255;
     var g = rgb[1]/255;
     var b = rgb[2]/255;
@@ -81,7 +79,6 @@ function rgb_to_yuv(rgb) {
     v = (-0.169 * r) - (0.331 * g) + (0.5 * b);
 
     // This method is wrong
-    
     return [y ,u,v];
 }
 
@@ -143,7 +140,7 @@ function xyz_to_luv(xyz) {
     var _V = 13 * _L * (var_V - ref_V);
 
     color = [_L, _U, _V];
-    console.log(_L, _U, _V);
+    //console.log(_L, _U, _V);
     return color;
 }
 
@@ -221,10 +218,10 @@ function rgb_to_hsl(rgb){
 
 // from http://mjijackson.com/2008/02/rgb-to-hsl-and-rgb-to-hsv-color-model-conversion-algorithms-in-javascript
 function rgb_to_hsvc(rgb){
-	 var r = rgb[0];
-	 var g = rgb[1];
-	 var b = rgb[2];
-    
+    var r = rgb[0];
+    var g = rgb[1];
+    var b = rgb[2];
+
     r = r/255;
     g = g/255;
     b = b/255;
@@ -251,8 +248,6 @@ function rgb_to_hsvc(rgb){
     return [h, s, v, c];
 }
 
-
-
 function genColorsRandom() {
 	var colors = [];
 
@@ -278,7 +273,6 @@ function genColors() {
 		}
 	return colors;
 }
-
 
 function Color(rgb) {
     this.red = parseFloat(rgb[0]);
@@ -337,6 +331,7 @@ function Color(rgb) {
     this.vvv = luv[2];
 
     // lab is supposed to map euclidian 3d distance to perceptive color
+    // more or less CIE 1976 Delta E
     this.lab3d = distFrom0(this.l, this.a, this.b);
     this.luv3d = distFrom0(this.ll, this.uu, this.vvv);
     //this.luv3dunsquared = unsquaredDistFrom0(this.ll, this.uu, this.vvv);
@@ -382,9 +377,6 @@ function Sorter(sort) {
     }
 }
 
-
-
-
 function preComputeColors(colors) {
 	var colorspaces = [];
 	for (color in colors) {
@@ -394,10 +386,27 @@ function preComputeColors(colors) {
 	return colorspaces;
 }
 
+sort_keys = ["red", "blue", "green",
+             "purple", "blueGreen", "brown",
+             "total",
+             "value", "sat", "hue",
+             "whiteness", "blackness",
+             "cr", "u", "vv",
+             "chroma", "lightness",
+             "x", "y", "z",
+             "l", "a", "b",
+             "ll", "uu", "vvv",
+             "cyan", "magenta", "yellow",
+             "rgb3d", "rgb3dweighted", "rgb3dweightedhigh",
+             "hsv3d",
+             "hsl3d",
+             "xyz3d",
+             "lab3d",
+             "luv3d"];
 
-
-function ColorSorter(colors) {
-
+function ColorSorter(colors, sort_keys) {
+    // for a list of colors, generate a sorted version for each
+    // attribute, so this contains many lists sorted in different orders
     var colors = colors;
     var colorList = [];
 
@@ -464,12 +473,10 @@ function ColorSorter(colors) {
         return colorList;
     }
 
-
 }
 
 
-
-function drawColorList(colorlist){
+function drawTableRows(colorlist){
     var t = document.getElementById('palette_table');
 	
 	// replace the rows in the table on redraw
@@ -478,27 +485,21 @@ function drawColorList(colorlist){
 		t.removeChild(t.firstChild);
 	}
 
-	
-//	cl = [colorlist.yellow];
     for (l in colorlist) {
-
        row = t.insertRow(0);
        var label = row.insertCell(0);
        label.innerHTML = l;
        var canvasCell = row.insertCell(0);
-       canvasCell.appendChild(drawPalette(colorlist[l]));
+       canvasCell.appendChild(drawPaletteCanvas(colorlist[l]));
 
        var label2 = row.insertCell(0);
        label2.innerHTML = l;
     }
-
-
 }
 
-function drawPalette(palette) {
+function drawPaletteCanvas(palette) {
     var canvas = document.createElement('canvas');
     canvas.id = l;
-
 
     var w_w = window.innerWidth;	
     var w = document.width;
@@ -544,16 +545,49 @@ function drawPalette(palette) {
     return canvas;
 }
 
-function updateTable(palette){
-  var rgbColors = getColors(palette);
-  var colors = preComputeColors(rgbColors);
-  var color_sorter = new ColorSorter(colors);
+function computePaletteColors(palette) {
+  var rgb_colors = getColorsFromPalette(palette);
+  var colors_all_spaces = preComputeColors(rgb_colors);
+  // should pass the list of sorting keys here
+  var color_sorter = new ColorSorter(colors_all_spaces);
+  // get a list of color lists sorted by each key
+  // one for each sort_key
   var color_list = color_sorter.getColors();
+  return color_list;
+}
 
-  drawColorList(color_list);
 
-} 
-      
+//function updateTable(palette) {
+function updateTablePalettes(palette) {
+  var color_list = computePaletteColors(palette);
+  drawTableRows(color_list);
+}
+
+function updateTableSorts(sort_key) {
+    var palette_names = getPalettes();
+    palette_names.reverse();
+    var palette_list = [];
+    var palette_name_index;
+    var palette_name;
+    for (palette_name_index in palette_names) {
+        //var palette = gup(palette_name);
+        // don't really need all the color attributes here, but...
+        palette_name = palette_names[palette_name_index];
+        var color_list_list = computePaletteColors(palette_name);
+        // assume the sort we care about is first
+
+        //var color_list = color_list_list.slice(0);
+        var colors_sorted = color_list_list[sort_key];
+        palette_list[palette_name] = colors_sorted;
+    }
+    drawTableRows(palette_list);
+    // for each palette
+    // sort colors by sort_key
+    // add a row to the table
+    // draw the palette
+}
+
+
 function writeTableRow(name, table, colors) {
 	var row = table.insertRow(0);
 	var label = row.insertCell(0);
@@ -565,7 +599,7 @@ function writeTableRow(name, table, colors) {
 	}
 	var cell = row.insertCell(0);
 	cell.innerHTML = name;
-}      
+}
 
 function genGrays() {
     list = []
@@ -636,7 +670,7 @@ function parseGpl(gpl){
     return gc;
 }
 
-function getColors(palette){
+function getColorsFromPalette(palette){
 
     var xhttp = new XMLHttpRequest();
 	var filename = "palettes/"+palette+".gpl";
@@ -651,12 +685,6 @@ function getColors(palette){
 	color_lists = new Array();
     color_lists[palette] = gpl_c;
     color_lists['grays'] = genGrays();
-
-
-
 	return color_lists[palette];
-
-}   
- 
- 
+}
 

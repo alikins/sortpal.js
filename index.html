@@ -5,7 +5,7 @@
     a.test { font-weight: bold; }
     body { color:#ffffff; }
  </style>
- 
+
  <script type="text/javascript" src="sortpal.js"></script>
  <script type="text/javascript" src="jquery.js"></script>
 
@@ -17,21 +17,29 @@ function update_palette() {
 	var query_palette = gup("palette");
 	console.log(query_palette);
 	//console.log(
-	    $(document).ready(function() { updateTable(_palette) });
+	    $(document).ready(function() { updateTablePalettes(_palette) });
      };
 
+function update_sorts() {
+	var _f = document.sort_select;
+	var _sort_key = _f.getElementsByTagName("select")[0].value;
+
+	console.log(_sort_key);
+	//console.log(
+	$(document).ready(function() { updateTableSorts(_sort_key) });
+   };
 
 </script>
 </head>
 
-
-<body bgcolor="#000000"> 
-
+<body bgcolor="#000000">
 
 <form id="palette_select" name="palette_select">
-<input type=button onclick="update_palette()" value="Show">
+<input type=button onclick="update_palette()" value="By palette">
+</form>
 
-
+<form id="sort_select" name="sort_select">
+<input type=button onclick="update_sorts()" value="by sort">
 </form>
 
 <div id="main">
@@ -43,28 +51,38 @@ function update_palette() {
 <script type="text/javascript">
  var f = document.getElementById("palette_select");
  var s = document.createElement("select");
- 
+
+ var ss = document.getElementById("sort_select");
+ var sort_select_select = document.createElement("select");
+
  var pl = getPalettes();
- 
+
  for (p in pl) {
 	var o = document.createElement("option");
 	o.text = pl[p];
 	o.value = pl[p]; 
 	s.appendChild(o);
 	}
- f.appendChild(s);
- 
 
-	
-	      $(document).ready(function(){
+ f.appendChild(s);
+
+ var sort_options = sort_keys;
+ for (sk_index in sort_options) {
+     var o = document.createElement("option");
+     o.text = sort_options[sk_index];
+     o.value = sort_options[sk_index];
+     sort_select_select.appendChild(o);
+ }
+ ss.appendChild(sort_select_select);
+
+ $(document).ready(function(){
 	var palette = gup("palette");
 	var default_palette = 'Named_Colors';
 	if(palette){
 		default_palette = palette;
-	}
-       updateTable(default_palette);
-     //  updateTable('warm');
-     });
+	    }
+    updateTablePalettes(default_palette);
+ });
 
 //updateTable('named');     
 </script>
